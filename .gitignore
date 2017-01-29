@@ -1,0 +1,10 @@
+/packages/Cinegy.TsDecoder.1.0.19/*.nupkg
+/packages
+/HttpRtpGateway/bin
+/HttpRtpGateway/obj
+/HttpRtpGateway/*.user
+/.vs
+*.suo
+bin
+obj
+*.user
