@@ -27,6 +27,13 @@ namespace Cinegy.Telemetry
 
         private JsonSerializerSettings JsonSerializerSettings { get; }
 
+        //TODO: Try and set these back to automatic - original way of working did not work with NET Standard 1.3
+        public string MachineName { get; set; }
+
+        public string ProductName { get; set; }
+
+        public string ProductVersion { get; set; }
+
         #endregion
 
         #region Override members
@@ -46,19 +53,19 @@ namespace Cinegy.Telemetry
                 { "Level", info.Level.ToString() },
                 { "Time", info.TimeStamp.ToUniversalTime().ToString("o") },
                 { "Tags", string.Join(",", _tags) },
-                { "Host", Environment.MachineName },
+                { "Host", MachineName },
                 { "Logger", info.LoggerName },
                 {
                     "Product", new
                     {
-                        Name = Assembly.GetEntryAssembly().GetName().Name,
-                        Version = Assembly.GetEntryAssembly().GetName().Version.ToString()
+                        Name = ProductName,
+                        Version = ProductVersion
                     }
                 }
             };
 
             if (!string.IsNullOrWhiteSpace(info.Message)) headerTable.Add("Message", info.Message);
-
+            
             var telemetryInfo = info as TelemetryLogEventInfo;
             if (telemetryInfo != null)
             {
@@ -67,7 +74,8 @@ namespace Cinegy.Telemetry
                 if (telemetryInfo.TelemetryObject != null)
                 {
                     var type = telemetryInfo.TelemetryObject.GetType();
-                    if (type.IsClass && type != typeof(string)) complexPayloadObject = telemetryInfo.TelemetryObject;
+                    
+                    if (type.GetTypeInfo().IsClass && type != typeof(string)) complexPayloadObject = telemetryInfo.TelemetryObject;
                     else headerTable.Add("Payload", telemetryInfo.TelemetryObject);
                 }
             }

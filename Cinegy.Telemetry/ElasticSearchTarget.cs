@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Configuration;
 using System.Linq;
 using Elasticsearch.Net;
 using Newtonsoft.Json;
@@ -18,15 +17,15 @@ namespace Cinegy.Telemetry
     {
         #region Static members
 
-        public static string GetConnectionString(string name)
-        {
-            var value = GetEnvironmentVariable(name);
-            if (!string.IsNullOrEmpty(value))
-                return value;
+        //public static string GetConnectionString(string name)
+        //{
+        //    var value = GetEnvironmentVariable(name);
+        //    if (!string.IsNullOrEmpty(value))
+        //        return value;
 
-            var connectionString = ConfigurationManager.ConnectionStrings[name];
-            return connectionString?.ConnectionString;
-        }
+        //    var connectionString = ConfigurationManager.ConnectionStrings[name];
+        //    return connectionString?.ConnectionString;
+        //}
 
         private static string GetEnvironmentVariable(string name)
         {
@@ -101,7 +100,8 @@ namespace Cinegy.Telemetry
         {
             base.InitializeTarget();
 
-            var uri = GetConnectionString(ConnectionStringName) ?? Uri;
+            //  var uri = GetConnectionString(ConnectionStringName) ?? Uri;
+            var uri = Uri;
             var nodes = uri.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries).Select(url => new Uri(url));
             var connectionPool = new StaticConnectionPool(nodes);
 

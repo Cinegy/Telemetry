@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cinegy.Telemetry", "Cinegy.Telemetry\Cinegy.Telemetry.csproj", "{8339004F-47D3-4FDC-A6D7-E0DE5969E9E5}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cinegy.Telemetry", "Cinegy.Telemetry\Cinegy.Telemetry.csproj", "{6BB29DB4-14FA-440C-A2D3-2F78523979E3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -11,10 +11,10 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{8339004F-47D3-4FDC-A6D7-E0DE5969E9E5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{8339004F-47D3-4FDC-A6D7-E0DE5969E9E5}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{8339004F-47D3-4FDC-A6D7-E0DE5969E9E5}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{8339004F-47D3-4FDC-A6D7-E0DE5969E9E5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6BB29DB4-14FA-440C-A2D3-2F78523979E3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6BB29DB4-14FA-440C-A2D3-2F78523979E3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6BB29DB4-14FA-440C-A2D3-2F78523979E3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6BB29DB4-14FA-440C-A2D3-2F78523979E3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
