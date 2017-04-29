@@ -43,6 +43,7 @@
     <Compile Include="ElasticSearchTarget.cs" />
     <Compile Include="LogSetup.cs" />
     <Compile Include="LogStructuredObject.cs" />
+    <Compile Include="Metrics\Metric.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TelemetryLayout.cs" />
     <Compile Include="TelemetryLogEventInfo.cs" />
