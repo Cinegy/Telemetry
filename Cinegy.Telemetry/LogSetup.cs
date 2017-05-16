@@ -10,24 +10,30 @@ namespace Cinegy.Telemetry
 {
     public static class LogSetup
     {
-        public static void ConfigureLogger(string appId, string orgId, string descriptorTags, string telemetryUrl, bool enableTelemetry)
+        public static void ConfigureLogger(string appId, string orgId, string descriptorTags, string telemetryUrl, bool enableTelemetry, bool enableConsole)
         {
-            var config = new LoggingConfiguration();
+            ConfigureLogger(appId, orgId, descriptorTags, telemetryUrl, enableTelemetry, LogLevel.Info, new LoggingConfiguration(), enableConsole);
+        }
 
-            var consoleTarget = new ColoredConsoleTarget();
-            config.AddTarget("console", consoleTarget);
-            consoleTarget.Layout = @"${date:format=HH\:mm\:ss} ${logger} ${message}";
-            config.LoggingRules.Add(new LoggingRule("*", LogLevel.Debug, consoleTarget));
+        public static void ConfigureLogger(string appId, string orgId, string descriptorTags, string telemetryUrl,
+            bool enableTelemetry, LogLevel telemetryLogLevel, LoggingConfiguration config, bool enableConsole)
+        {
+            if (enableConsole)
+            {
+                var consoleTarget = new ColoredConsoleTarget();
+                config.AddTarget("console", consoleTarget);
+                consoleTarget.Layout = @"${date:format=HH\:mm\:ss} ${logger} ${message}";
+                config.LoggingRules.Add(new LoggingRule("*", LogLevel.Debug, consoleTarget));
+            }
 
-            if (enableTelemetry)
+        if (enableTelemetry)
             {
                 var bufferedEsTarget = ConfigureEsLog(appId, orgId, descriptorTags, telemetryUrl);
                 config.AddTarget("elasticsearch", bufferedEsTarget);
-                config.LoggingRules.Add(new TelemetryLoggingRule("*", LogLevel.Info, bufferedEsTarget));
+                config.LoggingRules.Add(new TelemetryLoggingRule("*", telemetryLogLevel, bufferedEsTarget));
             }
 
             LogManager.Configuration = config;
-
         }
 
         private static BufferingTargetWrapper ConfigureEsLog(string appId, string orgId, string descriptorTags, string telemetryUrl)
