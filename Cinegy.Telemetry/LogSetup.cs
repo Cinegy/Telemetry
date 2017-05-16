@@ -43,7 +43,7 @@ namespace Cinegy.Telemetry
 
             var elasticSearchTarget = new ElasticSearchTarget
             {
-                Layout = new TelemetryLayout(descriptorTags.Split(',').Enumerate().ToArray()),
+                Layout = new TelemetryLayout(descriptorTags?.Split(',').Enumerate().ToArray()),
                 Uri = telemetryUrl,
                 Index = renderedIndex
             };
