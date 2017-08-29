@@ -43,7 +43,7 @@ namespace Cinegy.Telemetry
             Name = "ElasticSearch";
             Uri = "http://localhost:9200";
             DocumentType = "logevent";
-            Index = "httprtpgateway-${date:format=yyyy-MM-dd}";
+            Index = "httprtpgateway-${date:universalTime=true:format=yyyy-MM-dd}";
         }
 
         #endregion
