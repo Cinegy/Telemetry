@@ -10,13 +10,13 @@ namespace Cinegy.Telemetry
 {
     public static class LogSetup
     {
-        public static void ConfigureLogger(string appId, string orgId, string descriptorTags, string telemetryUrl, bool enableTelemetry, bool enableConsole)
+        public static void ConfigureLogger(string appId, string orgId, string descriptorTags, string telemetryUrl, bool enableTelemetry, bool enableConsole, string productName, string productVersion)
         {
-            ConfigureLogger(appId, orgId, descriptorTags, telemetryUrl, enableTelemetry, LogLevel.Info, new LoggingConfiguration(), enableConsole);
+            ConfigureLogger(appId, orgId, descriptorTags, telemetryUrl, enableTelemetry, LogLevel.Info, new LoggingConfiguration(), enableConsole,  productName, productVersion);
         }
 
         public static void ConfigureLogger(string appId, string orgId, string descriptorTags, string telemetryUrl,
-            bool enableTelemetry, LogLevel telemetryLogLevel, LoggingConfiguration config, bool enableConsole)
+            bool enableTelemetry, LogLevel telemetryLogLevel, LoggingConfiguration config, bool enableConsole, string productName, string productVersion)
         {
             if (enableConsole)
             {
@@ -28,7 +28,7 @@ namespace Cinegy.Telemetry
 
         if (enableTelemetry)
             {
-                var bufferedEsTarget = ConfigureEsLog(appId, orgId, descriptorTags, telemetryUrl);
+                var bufferedEsTarget = ConfigureEsLog(appId, orgId, descriptorTags, telemetryUrl, productName, productVersion);
                 config.AddTarget("elasticsearch", bufferedEsTarget);
                 config.LoggingRules.Add(new TelemetryLoggingRule("*", telemetryLogLevel, bufferedEsTarget));
             }
@@ -36,20 +36,25 @@ namespace Cinegy.Telemetry
             LogManager.Configuration = config;
         }
 
-        private static BufferingTargetWrapper ConfigureEsLog(string appId, string orgId, string descriptorTags, string telemetryUrl)
+        private static BufferingTargetWrapper ConfigureEsLog(string appId, string orgId, string descriptorTags, string telemetryUrl, string productName, string productVersion)
         {
-            var indexNameParts = new List<string> { appId, "${date:format=yyyy.MM.dd}" };
+            var indexNameParts = new List<string> { appId, "${date:universalTime=true:format=yyyy.MM.dd}" };
 
             if (!string.IsNullOrEmpty(orgId))
             {
-                indexNameParts = new List<string> { $"{appId}-{orgId}", "${date:format=yyyy.MM.dd}" };
+                indexNameParts = new List<string> { $"{appId}-{orgId.ToLowerInvariant()}", "${date:universalTime=true:format=yyyy.MM.dd}" };
             }
 
             var renderedIndex = Layout.FromString(string.Join("-", indexNameParts));
 
             var elasticSearchTarget = new ElasticSearchTarget
             {
-                Layout = new TelemetryLayout(descriptorTags?.Split(',').Enumerate().ToArray()),
+                Layout = new TelemetryLayout(descriptorTags?.Split(',').Enumerate().ToArray())
+                {
+                    ProductName = productName,
+                    ProductVersion = productVersion
+                }
+                ,
                 Uri = telemetryUrl,
                 Index = renderedIndex
             };
