@@ -3,8 +3,8 @@
   "dependencies": {
     "Microsoft.NETCore.Portable.Compatibility": "1.0.1",
     "NETStandard.Library": "1.6.1",
-    "Newtonsoft.Json": "10.0.2",
-    "NLog": "5.0.0-beta07",
+    "Newtonsoft.Json": "10.0.3",
+    "NLog": "5.0.0-beta11",
     "NLog.Targets.ElasticSearch": "4.0.0-beta21"
   },
   "frameworks": {
