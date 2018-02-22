@@ -30,7 +30,7 @@ namespace Cinegy.Telemetry.Metrics
         /// </summary>
         public int SamplingPeriod
         {
-            get { return _samplingPeriod; }
+            get => _samplingPeriod;
             set
             {
                 _samplingPeriod = value;

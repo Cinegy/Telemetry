@@ -8,10 +8,10 @@ Not a lot - we make this library to make it easier for our tooling to talk back 
 
 ## Getting the library
 
-Just to make our life easier, we auto-build this using AppVeyor and push to NuGet - here is how we are doing right now: 
+Just to make our life easier, we auto-build this using AppVeyor and push to NuGet - here is how we are doing right now for MASTER: 
 
-[![Build status](https://ci.appveyor.com/api/projects/status/CORRECTME?svg=true)](https://ci.appveyor.com/project/cinegy/telemetry)
+[![Build status](https://ci.appveyor.com/api/projects/status/o2ohedex2a596gfn/branch/master?svg=true)](https://ci.appveyor.com/project/cinegy/telemetry/branch/master)
 
-You can check out the latest compiled binary from the master or pre-master code here:
+You can check out the latest compiled binary from the master branch here:
 
-[AppVeyor HttpRtpGateway Project Builder](https://ci.appveyor.com/project/cinegy/telemetry/build/artifacts)
+[AppVeyor Telemetry Project Builder](https://ci.appveyor.com/project/cinegy/telemetry/build/artifacts)
