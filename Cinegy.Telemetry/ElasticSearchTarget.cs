@@ -17,16 +17,6 @@ namespace Cinegy.Telemetry
     {
         #region Static members
 
-        //public static string GetConnectionString(string name)
-        //{
-        //    var value = GetEnvironmentVariable(name);
-        //    if (!string.IsNullOrEmpty(value))
-        //        return value;
-
-        //    var connectionString = ConfigurationManager.ConnectionStrings[name];
-        //    return connectionString?.ConnectionString;
-        //}
-
         private static string GetEnvironmentVariable(string name)
         {
             return string.IsNullOrEmpty(name) ? null : Environment.GetEnvironmentVariable(name);
@@ -43,7 +33,7 @@ namespace Cinegy.Telemetry
             Name = "ElasticSearch";
             Uri = "http://localhost:9200";
             DocumentType = "logevent";
-            Index = "httprtpgateway-${date:universalTime=true:format=yyyy-MM-dd}";
+            Index = "cinegytelemetry-${date:universalTime=true:format=yyyy-MM-dd}";
         }
 
         #endregion
@@ -99,8 +89,7 @@ namespace Cinegy.Telemetry
         protected override void InitializeTarget()
         {
             base.InitializeTarget();
-
-            //  var uri = GetConnectionString(ConnectionStringName) ?? Uri;
+            
             var uri = Uri;
             var nodes = uri.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries).Select(url => new Uri(url));
             var connectionPool = new StaticConnectionPool(nodes);
@@ -113,17 +102,25 @@ namespace Cinegy.Telemetry
             }
 
             if (ElasticsearchSerializer != null)
-                config = new ConnectionConfiguration(connectionPool, _ => ElasticsearchSerializer);
+            {
+                config = new ConnectionConfiguration(connectionPool, ElasticsearchSerializer);
+            }
 
             _client = new ElasticLowLevelClient(config);
         }
 
         protected override void Write(AsyncLogEventInfo logEvent)
         {
-            Write(new[] { logEvent });
+            Write(new List<AsyncLogEventInfo>(1) { logEvent });
         }
 
+        [Obsolete]
         protected override void Write(AsyncLogEventInfo[] logEvents)
+        {
+            SendBatch(logEvents);
+        }
+
+        protected override void Write(IList<AsyncLogEventInfo> logEvents)
         {
             SendBatch(logEvents);
         }
@@ -179,9 +176,9 @@ namespace Cinegy.Telemetry
                 var logEvents = events.Select(e => e.LogEvent);
 
                 var payload = FormPayload(logEvents);
-
-                var result = _client.Bulk<byte[]>(payload);
-
+                
+                var result = _client.Bulk< StringResponse>(PostData.MultiJson(payload));
+                
                 if (result.Success)
                     return;
 

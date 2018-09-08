@@ -27,7 +27,7 @@ namespace Cinegy.Telemetry
 
         private JsonSerializerSettings JsonSerializerSettings { get; }
 
-        public string MachineName { get; set; } = System.Environment.GetEnvironmentVariable("COMPUTERNAME");
+        public string MachineName { get; set; } = Environment.MachineName;
 
         //TODO: Try and set these back to automatic - original way of working did not work with NET Standard 1.3
         public string ProductName { get; set; }

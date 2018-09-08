@@ -1,6 +1,6 @@
 ﻿namespace Cinegy.Telemetry
 {
-    internal class LogStructuredObject
+    internal class LogStructuredObjectExample
     {
         public People People { get; set; }
     }

@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net461;netcoreapp2.0</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0</TargetFrameworks>
     <Version>2.0.0-beta</Version>
     <Authors>Lewis Kirkaldie</Authors>
     <Company>Cinegy GmbH</Company>
@@ -10,15 +10,15 @@
     <PackageTags>Cinegy Telemetry Logging</PackageTags>
     <PackageLicenseUrl>http://www.apache.org/licenses/LICENSE-2.0</PackageLicenseUrl>
     <PackageProjectUrl>https://github.com/Cinegy/Telemetry</PackageProjectUrl>
-    <PackageReleaseNotes>Now with multiple builds targetting NET Framework and NET Core 2.0</PackageReleaseNotes>
+    <PackageReleaseNotes>Moved to just netstandard</PackageReleaseNotes>
     <NeutralLanguage />
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Newtonsoft.Json" Version="11.0.1" />
-    <PackageReference Include="NLog" Version="4.5.0-rc06" />
-    <PackageReference Include="NLog.Targets.ElasticSearch" Version="4.0.0-beta26" />
+    <PackageReference Include="Elasticsearch.Net" Version="6.2.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
+    <PackageReference Include="NLog" Version="4.5.9" />
   </ItemGroup>
 
 </Project>
