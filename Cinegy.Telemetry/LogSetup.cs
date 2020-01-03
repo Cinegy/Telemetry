@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using NLog;
 using NLog.Config;
@@ -26,7 +27,7 @@ namespace Cinegy.Telemetry
                 config.LoggingRules.Add(new LoggingRule("*", LogLevel.Debug, consoleTarget));
             }
 
-        if (enableTelemetry)
+            if (enableTelemetry)
             {
                 var bufferedEsTarget = ConfigureEsLog(appId, orgId, descriptorTags, telemetryUrl, productName, productVersion);
                 config.AddTarget("elasticsearch", bufferedEsTarget);
@@ -46,6 +47,12 @@ namespace Cinegy.Telemetry
             }
 
             var renderedIndex = Layout.FromString(string.Join("-", indexNameParts));
+
+            //check to see if an environment variable is set to override telemetry targets
+            if (!string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("OVERRIDE_CINEGY_TELEMETRY_TARGET")))
+            {
+                telemetryUrl = Environment.GetEnvironmentVariable("OVERRIDE_CINEGY_TELEMETRY_TARGET");
+            }
 
             var elasticSearchTarget = new ElasticSearchTarget
             {

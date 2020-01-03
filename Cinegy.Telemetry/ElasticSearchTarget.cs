@@ -15,15 +15,6 @@ namespace Cinegy.Telemetry
     [Target("ElasticSearch")]
     public class ElasticSearchTarget : TargetWithLayout
     {
-        #region Static members
-
-        private static string GetEnvironmentVariable(string name)
-        {
-            return string.IsNullOrEmpty(name) ? null : Environment.GetEnvironmentVariable(name);
-        }
-
-        #endregion
-
         private IElasticLowLevelClient _client;
 
         #region Constructors
