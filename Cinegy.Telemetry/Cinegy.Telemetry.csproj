@@ -2,14 +2,14 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <Version>2.0.1</Version>
+    <Version>3.0.0</Version>
     <Authors>Lewis Kirkaldie</Authors>
     <Company>Cinegy GmbH</Company>
     <Description>Telemetry library for logging via NLog to Cinegy Telemetry via ElasticSearch , in C# targetting NET Standard 2.0</Description>
     <Copyright>Cinegy GmbH</Copyright>
     <PackageTags>Cinegy Telemetry Logging</PackageTags>
     <PackageProjectUrl>https://github.com/Cinegy/Telemetry</PackageProjectUrl>
-    <PackageReleaseNotes>Updated ES .Net package to latest, remove beta flags</PackageReleaseNotes>
+    <PackageReleaseNotes>BREAKING - Change to camel case objects in telemetry (move to v3)</PackageReleaseNotes>
     <NeutralLanguage />
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>

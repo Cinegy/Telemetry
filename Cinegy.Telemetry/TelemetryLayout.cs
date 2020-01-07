@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 using NLog;
 using NLog.Layouts;
 
@@ -18,7 +19,11 @@ namespace Cinegy.Telemetry
         public TelemetryLayout(params string[] tags)
         {
             _tags = tags.Enumerate().ToArray();
-            JsonSerializerSettings = new JsonSerializerSettings();
+            JsonSerializerSettings = new JsonSerializerSettings()
+            {
+                ContractResolver = new CamelCasePropertyNamesContractResolver(),
+                NullValueHandling = NullValueHandling.Ignore,
+            };
         }
 
         #endregion
