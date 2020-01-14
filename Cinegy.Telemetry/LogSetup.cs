@@ -27,7 +27,7 @@ namespace Cinegy.Telemetry
                 config.LoggingRules.Add(new LoggingRule("*", LogLevel.Debug, consoleTarget));
             }
 
-            if (enableTelemetry)
+            if (enableTelemetry && string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("OVERRIDE_CINEGY_TELEMETRY_TO_DISABLED")))
             {
                 var bufferedEsTarget = ConfigureEsLog(appId, orgId, descriptorTags, telemetryUrl, productName, productVersion);
                 config.AddTarget("elasticsearch", bufferedEsTarget);
