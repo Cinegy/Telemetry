@@ -34,6 +34,12 @@ namespace Cinegy.Telemetry
                 config.LoggingRules.Add(new TelemetryLoggingRule("*", telemetryLogLevel, bufferedEsTarget));
             }
 
+            var signalRTarget = new SignalRTarget();
+            config.AddTarget("signalr",signalRTarget);
+            signalRTarget.Layout = @"${date:format=HH\:mm\:ss} ${logger} ${message}";
+            config.LoggingRules.Add(new LoggingRule("*",LogLevel.Debug,signalRTarget));
+
+
             LogManager.Configuration = config;
         }
 
