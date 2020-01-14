@@ -24,7 +24,7 @@ namespace Cinegy.Telemetry
                 var consoleTarget = new ColoredConsoleTarget();
                 config.AddTarget("console", consoleTarget);
                 consoleTarget.Layout = @"${date:format=HH\:mm\:ss} ${logger} ${message}";
-                config.LoggingRules.Add(new LoggingRule("*", LogLevel.Debug, consoleTarget));
+                config.LoggingRules.Add(new LoggingRule("*", LogLevel.Info, consoleTarget));
             }
 
             if (enableTelemetry)
@@ -33,13 +33,7 @@ namespace Cinegy.Telemetry
                 config.AddTarget("elasticsearch", bufferedEsTarget);
                 config.LoggingRules.Add(new TelemetryLoggingRule("*", telemetryLogLevel, bufferedEsTarget));
             }
-
-            var signalRTarget = new SignalRTarget();
-            config.AddTarget("signalr",signalRTarget);
-            signalRTarget.Layout = @"${date:format=HH\:mm\:ss} ${logger} ${message}";
-            config.LoggingRules.Add(new LoggingRule("*",LogLevel.Debug,signalRTarget));
-
-
+            
             LogManager.Configuration = config;
         }
 
