@@ -11,33 +11,33 @@ namespace Cinegy.Telemetry
 {
     public static class LogSetup
     {
-        public static void ConfigureLogger(string appId, string orgId, string descriptorTags, string telemetryUrl, bool enableTelemetry, bool enableConsole, string productName, string productVersion)
+        public static void ConfigureLogger(string appId, string orgId, string descriptorTags, string telemetryUrl, bool enableTelemetry, bool enableConsole = false, string productName = null)
         {
-            ConfigureLogger(appId, orgId, descriptorTags, telemetryUrl, enableTelemetry, LogLevel.Info, new LoggingConfiguration(), enableConsole,  productName, productVersion);
+            ConfigureLogger(appId, orgId, descriptorTags, telemetryUrl, enableTelemetry, LogLevel.Info, new LoggingConfiguration(), enableConsole,  productName);
         }
 
         public static void ConfigureLogger(string appId, string orgId, string descriptorTags, string telemetryUrl,
-            bool enableTelemetry, LogLevel telemetryLogLevel, LoggingConfiguration config, bool enableConsole, string productName, string productVersion)
+            bool enableTelemetry, LogLevel telemetryLogLevel, LoggingConfiguration config, bool enableConsole, string productName)
         {
             if (enableConsole)
             {
                 var consoleTarget = new ColoredConsoleTarget();
                 config.AddTarget("console", consoleTarget);
-                consoleTarget.Layout = @"${date:format=HH\:mm\:ss} ${logger} ${message}";
+                consoleTarget.Layout = @"${date:format=HH\:mm\:ss} ${message} (${logger})";
                 config.LoggingRules.Add(new LoggingRule("*", LogLevel.Info, consoleTarget));
             }
 
             if (enableTelemetry)
             {
-                var bufferedEsTarget = ConfigureEsLog(appId, orgId, descriptorTags, telemetryUrl, productName, productVersion);
+                var bufferedEsTarget = ConfigureEsLog(appId, orgId, descriptorTags, telemetryUrl, productName);
                 config.AddTarget("elasticsearch", bufferedEsTarget);
-                config.LoggingRules.Add(new TelemetryLoggingRule("*", telemetryLogLevel, bufferedEsTarget));
+                config.LoggingRules.Add(new LoggingRule("*", telemetryLogLevel, bufferedEsTarget));
             }
             
             LogManager.Configuration = config;
         }
 
-        private static BufferingTargetWrapper ConfigureEsLog(string appId, string orgId, string descriptorTags, string telemetryUrl, string productName, string productVersion)
+        private static BufferingTargetWrapper ConfigureEsLog(string appId, string orgId, string descriptorTags, string telemetryUrl, string productName)
         {
             var indexNameParts = new List<string> { appId, "${date:universalTime=true:format=yyyy.MM.dd}" };
 
@@ -56,15 +56,13 @@ namespace Cinegy.Telemetry
 
             var elasticSearchTarget = new ElasticSearchTarget
             {
-                Layout = new TelemetryLayout(descriptorTags?.Split(',').Enumerate().ToArray())
-                {
-                    ProductName = productName,
-                    ProductVersion = productVersion
-                }
-                ,
+                Layout = new TelemetryLayout(descriptorTags?.Split(',').Enumerate().ToArray()),
                 Uri = telemetryUrl,
                 Index = renderedIndex
             };
+
+            if (!string.IsNullOrEmpty(productName))
+                ((TelemetryLayout)elasticSearchTarget.Layout).ProductName = productName;
 
             var bufferingTarget = new BufferingTargetWrapper(elasticSearchTarget)
             {

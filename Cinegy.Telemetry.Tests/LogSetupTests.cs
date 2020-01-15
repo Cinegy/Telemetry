@@ -18,20 +18,17 @@ namespace Cinegy.Telemetry.Tests
             {
                 _logger = LogManager.GetCurrentClassLogger();
 
-                var buildVersion = Assembly.GetEntryAssembly()?.GetName().Version.ToString();
-
                 LogSetup.ConfigureLogger("telemetryunittest","Cinegy","UnitTesting",
-                    "http://telemetry.cinegy.com",enableTelemetry: true,enableConsole:false,"TelemetryLibTest", buildVersion);
+                    "http://telemetry.cinegy.com",enableTelemetry: true);
                
                 _logger.Info($"Cinegy Telemetry Unit Test Running at {DateTime.UtcNow:O}");
-
-                //allow a long sleep, to permit the logger to create any daily indices and to flush logs
-                Thread.Sleep(60000);
-
             }
-            catch (Exception ex)
-            {
+            catch (Exception ex){
                 Assert.Fail($"Failed to setup and log test message: {ex.Message}");
+            }
+            finally{
+                // Ensure to flush and stop internal timers/threads before application-exit (Avoid segmentation fault on Linux)
+                LogManager.Shutdown();
             }
          
         }

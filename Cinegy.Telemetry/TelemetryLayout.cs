@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using NLog;
+using NLog.Common;
 using NLog.Layouts;
 
 namespace Cinegy.Telemetry
@@ -19,6 +21,29 @@ namespace Cinegy.Telemetry
         public TelemetryLayout(params string[] tags)
         {
             _tags = tags.Enumerate().ToArray();
+            
+            try
+            {
+                var idPath = Path.Combine(Environment.GetFolderPath(
+                    Environment.SpecialFolder.ApplicationData), "Cinegy\\Telemetry\\envid.txt");
+
+                if (File.Exists(idPath))
+                {
+                    EnvironmentId = File.ReadAllText(idPath);
+                }
+                else
+                {
+                    EnvironmentId = Guid.NewGuid().ToString();
+                    if(!Directory.Exists(Path.GetDirectoryName(idPath))) Directory.CreateDirectory(Path.GetDirectoryName(idPath) ?? throw new InvalidOperationException());
+                    File.WriteAllText(idPath, EnvironmentId);
+                }
+                
+            }
+            catch (Exception ex)
+            {
+                InternalLogger.Error($"IO error working with Environment ID file: {ex.Message}");
+            }
+
             JsonSerializerSettings = new JsonSerializerSettings()
             {
                 ContractResolver = new CamelCasePropertyNamesContractResolver(),
@@ -34,10 +59,11 @@ namespace Cinegy.Telemetry
 
         public string MachineName { get; set; } = Environment.MachineName;
 
-        //TODO: Try and set these back to automatic - original way of working did not work with NET Standard 1.3
-        public string ProductName { get; set; }
+        public string ProductName { get; set; } = Assembly.GetEntryAssembly()?.GetName().Name;
 
-        public string ProductVersion { get; set; }
+        public string ProductVersion => Assembly.GetEntryAssembly()?.GetName().Version.ToString();
+
+        public string EnvironmentId { get; }
 
         #endregion
 
@@ -53,12 +79,13 @@ namespace Cinegy.Telemetry
         protected override string GetFormattedMessage(LogEventInfo info)
         {
             object complexPayloadObject = null;
-            var headerTable = new Dictionary<string, object>
+            var eventObjectDictionary = new Dictionary<string, object>
             {
                 { "Level", info.Level.ToString() },
                 { "Time", info.TimeStamp.ToUniversalTime().ToString("o") },
                 { "Tags", string.Join(",", _tags) },
                 { "Host", MachineName },
+                { "EnvironmentId", EnvironmentId },
                 { "Logger", info.LoggerName },
                 {
                     "Product", new
@@ -69,40 +96,38 @@ namespace Cinegy.Telemetry
                 }
             };
 
-            if (!string.IsNullOrWhiteSpace(info.Message)) headerTable.Add("Message", info.Message);
-            
-            var telemetryInfo = info as TelemetryLogEventInfo;
-            if (telemetryInfo != null)
+            if (!string.IsNullOrWhiteSpace(info.Message)) eventObjectDictionary.Add("Message", info.Message);
+
+            if (info is TelemetryLogEventInfo telemetryInfo)
             {
-                headerTable.Add("Key", telemetryInfo.Key ?? "Generic");
+                eventObjectDictionary.Add("Key", telemetryInfo.Key ?? "Generic");
 
                 if (telemetryInfo.TelemetryObject != null)
                 {
                     var type = telemetryInfo.TelemetryObject.GetType();
                     
                     if (type.GetTypeInfo().IsClass && type != typeof(string)) complexPayloadObject = telemetryInfo.TelemetryObject;
-                    else headerTable.Add("Payload", telemetryInfo.TelemetryObject);
+                    else eventObjectDictionary.Add("Payload", telemetryInfo.TelemetryObject);
                 }
             }
             else
             {
-                headerTable.Add("Key", "Message");
+                eventObjectDictionary.Add("Key", "Message");
             }
 
-            var header = JsonConvert.SerializeObject(headerTable, JsonSerializerSettings);
+            var eventJson = JsonConvert.SerializeObject(eventObjectDictionary, JsonSerializerSettings);
 
-            if (complexPayloadObject != null)
-            {
-                var complexPayload = JsonConvert.SerializeObject(complexPayloadObject, JsonSerializerSettings);
-                return string.Join(",",
-                                   header.Substring(0, header.Length - 1),
-                                   complexPayload.Substring(1));
-            }
+            if (complexPayloadObject == null) return eventJson;
 
-            return header;
+            var complexPayload = JsonConvert.SerializeObject(complexPayloadObject, JsonSerializerSettings);
+            return string.Join(",",
+                eventJson.Substring(0, eventJson.Length - 1),
+                complexPayload.Substring(1));
+
         }
 
         #endregion
+
     }
 
     public static class CollectionExtensions
