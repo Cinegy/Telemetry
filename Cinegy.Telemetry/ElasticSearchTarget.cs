@@ -120,7 +120,7 @@ namespace Cinegy.Telemetry
 
         #region Members
 
-        private List<object> FormPayload(IEnumerable<LogEventInfo> logEvents)
+        private IEnumerable<object> FormPayload(IEnumerable<LogEventInfo> logEvents)
         {
             var payload = new List<object>();
 
@@ -129,7 +129,7 @@ namespace Cinegy.Telemetry
                 var rendered = Layout.Render(logEvent);
                 var index = Index.Render(logEvent).ToLowerInvariant();
                 var type = DocumentType.Render(logEvent);
-
+                
                 payload.Add(new
                 {
                     index = new
@@ -146,15 +146,14 @@ namespace Cinegy.Telemetry
             return payload;
         }
 
-        Dictionary<string, object> Parse(JObject obj)
+        private static Dictionary<string, object> Parse(JToken obj)
         {
             var dictionary = obj.ToObject<Dictionary<string, object>>();
 
             foreach (var key in dictionary.Keys.ToArray())
             {
                 var value = dictionary[key];
-                var jObject = value as JObject;
-                if (jObject != null) dictionary[key] = Parse(jObject);
+                if (value is JObject jObject) dictionary[key] = Parse(jObject);
             }
 
             return dictionary;
@@ -167,7 +166,7 @@ namespace Cinegy.Telemetry
                 var logEvents = events.Select(e => e.LogEvent);
 
                 var payload = FormPayload(logEvents);
-                
+
                 var result = _client.Bulk< StringResponse>(PostData.MultiJson(payload));
                 
                 if (result.Success)
