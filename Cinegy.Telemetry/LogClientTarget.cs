@@ -20,7 +20,7 @@ namespace Cinegy.Telemetry
             try
             {
                 var idPath = Path.Combine(Environment.GetFolderPath(
-                    Environment.SpecialFolder.ApplicationData), "Cinegy\\Telemetry\\envid.txt");
+                    Environment.SpecialFolder.LocalApplicationData), "Cinegy\\Telemetry\\envid.txt");
 
                 if (File.Exists(idPath))
                 {
