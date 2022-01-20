@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Reflection;
 using System.Threading;
 using NLog;
@@ -18,7 +18,9 @@ namespace Cinegy.Telemetry.Tests
             {
                 _logger = LogManager.GetCurrentClassLogger();
 
-                LogSetup.ConfigureLogger("telemetryunittest","Cinegy","UnitTesting",
+                var buildVersion = Assembly.GetEntryAssembly()?.GetName().Version!.ToString();
+
+              LogSetup.ConfigureLogger("telemetryunittest","Cinegy","UnitTesting",
                     "http://telemetry.cinegy.com",enableTelemetry: true);
                
                 _logger.Info($"Cinegy Telemetry Unit Test Running at {DateTime.UtcNow:O}");
