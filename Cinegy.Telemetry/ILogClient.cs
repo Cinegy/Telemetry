@@ -4,6 +4,6 @@ namespace Cinegy.Telemetry
 {
     public interface ILogClient
     {
-        Task SendMessage(string message);
+        Task SendMessage(object message);
     }
 }
