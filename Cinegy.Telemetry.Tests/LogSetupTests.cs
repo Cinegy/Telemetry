@@ -18,7 +18,7 @@ namespace Cinegy.Telemetry.Tests
             {
                 _logger = LogManager.GetCurrentClassLogger();
 
-                var buildVersion = Assembly.GetEntryAssembly()?.GetName().Version.ToString();
+                var buildVersion = Assembly.GetEntryAssembly()?.GetName().Version!.ToString();
 
                 LogSetup.ConfigureLogger("telemetryunittest","Cinegy","UnitTesting",
                     "http://telemetry.cinegy.com",enableTelemetry: true,enableConsole:false,"TelemetryLibTest", buildVersion);
