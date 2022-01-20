@@ -26,5 +26,5 @@ after_build:
 deploy:
 - provider: NuGet
   api_key:
-    secure: 1jfyZpEk52YsOKOQmOWEZYcglb8KoKUpN9l0qjhkasGbh3Fvts2VqxiLAvu+Uamy
+    secure: tMCS1lvz6Py0b8ydbFKWP62gYQPJMJtb0K049OqObIonopypWe/t/sTH/xsyRZL8
   skip_symbols: false
