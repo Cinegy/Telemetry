@@ -58,8 +58,7 @@ namespace Cinegy.Telemetry
             
             if (settings?.Enabled == true && Environment.GetEnvironmentVariable("OVERRIDE_CINEGY_TELEMETRY_TO_DISABLED") == null)
             {
-                var bufferedEsTarget = GetElasticsearchBufferingTargetWrapper(settings.ApplicationId, settings.OrganizationId,
-                    settings.RecordTags, settings.TelemetryUrl, settings.ProductName);
+                var bufferedEsTarget = GetElasticsearchBufferingTargetWrapper(settings);
                 
                 LogManager.Configuration.AddRule(LogLevel.FromString(settings.LogLevel), LogLevel.Fatal, bufferedEsTarget);
             }
@@ -68,13 +67,13 @@ namespace Cinegy.Telemetry
             return LogManager.GetCurrentClassLogger();
         }
         
-        public static BufferingTargetWrapper GetElasticsearchBufferingTargetWrapper(string appId, string orgId, string descriptorTags, string telemetryUrl, string productName)
+        public static BufferingTargetWrapper GetElasticsearchBufferingTargetWrapper(TelemetrySettings settings)
         {
-            var indexNameParts = new List<string> { appId, "${date:universalTime=true:format=yyyy.MM.dd}" };
+            var indexNameParts = new List<string> { settings.ApplicationId, "${date:universalTime=true:format=yyyy.MM.dd}" };
 
-            if (!string.IsNullOrEmpty(orgId))
+            if (!string.IsNullOrEmpty(settings.OrganizationId))
             {
-                indexNameParts = new List<string> { $"{appId}-{orgId.ToLowerInvariant()}", "${date:universalTime=true:format=yyyy.MM.dd}" };
+                indexNameParts = new List<string> { $"{settings.ApplicationId}-{settings.OrganizationId.ToLowerInvariant()}", "${date:universalTime=true:format=yyyy.MM.dd}" };
             }
 
             var renderedIndex = Layout.FromString(string.Join("-", indexNameParts));
@@ -82,18 +81,18 @@ namespace Cinegy.Telemetry
             //check to see if an environment variable is set to override telemetry targets
             if (!string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("OVERRIDE_CINEGY_TELEMETRY_TARGET")))
             {
-                telemetryUrl = Environment.GetEnvironmentVariable("OVERRIDE_CINEGY_TELEMETRY_TARGET");
+                settings.TelemetryUrl = Environment.GetEnvironmentVariable("OVERRIDE_CINEGY_TELEMETRY_TARGET");
             }
 
             var elasticSearchTarget = new ElasticSearchTarget
             {
-                Layout = new TelemetryLayout(descriptorTags?.Split(',').Enumerate().ToArray()),
-                Uri = telemetryUrl,
+                Layout = new TelemetryLayout(settings.RecordTags?.Split(',').Enumerate().ToArray()),
+                Uri = settings.TelemetryUrl,
                 Index = renderedIndex
             };
 
-            if (!string.IsNullOrEmpty(productName))
-                ((TelemetryLayout)elasticSearchTarget.Layout).ProductName = productName;
+            if (!string.IsNullOrEmpty(settings.ProductName))
+                ((TelemetryLayout)elasticSearchTarget.Layout).ProductName = settings.ProductName;
 
             var bufferingTarget = new BufferingTargetWrapper(elasticSearchTarget)
             {

@@ -8,7 +8,7 @@
          
         public bool Enabled { get; set; } = false;
 
-        public string ProductName { get; set; } = "Telemetry";
+        public string ProductName { get; set; } = string.Empty;
 
         public string ApplicationId { get; set; } = "telemetry";
 
