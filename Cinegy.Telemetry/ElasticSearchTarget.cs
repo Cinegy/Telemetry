@@ -104,13 +104,7 @@ namespace Cinegy.Telemetry
         {
             Write(new List<AsyncLogEventInfo>(1) { logEvent });
         }
-
-        [Obsolete]
-        protected override void Write(AsyncLogEventInfo[] logEvents)
-        {
-            SendBatch(logEvents);
-        }
-
+        
         protected override void Write(IList<AsyncLogEventInfo> logEvents)
         {
             SendBatch(logEvents);
@@ -134,8 +128,7 @@ namespace Cinegy.Telemetry
                 {
                     index = new
                     {
-                        _index = index,
-                        _type = type,
+                        _index = index
                     }
                 });
 
@@ -150,6 +143,8 @@ namespace Cinegy.Telemetry
         {
             var dictionary = obj.ToObject<Dictionary<string, object>>();
 
+            if (dictionary == null) return null;
+            
             foreach (var key in dictionary.Keys.ToArray())
             {
                 var value = dictionary[key];
@@ -157,6 +152,7 @@ namespace Cinegy.Telemetry
             }
 
             return dictionary;
+        
         }
 
         private void SendBatch(IEnumerable<AsyncLogEventInfo> events)

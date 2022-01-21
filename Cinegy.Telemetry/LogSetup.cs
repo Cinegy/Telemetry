@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using NLog;
 using NLog.Config;
+using NLog.LayoutRenderers.Wrappers;
 using NLog.Layouts;
 using NLog.Targets;
 using NLog.Targets.Wrappers;
@@ -11,33 +14,61 @@ namespace Cinegy.Telemetry
 {
     public static class LogSetup
     {
-        public static void ConfigureLogger(string appId, string orgId, string descriptorTags, string telemetryUrl, bool enableTelemetry, bool enableConsole = false, string productName = null)
+        private static readonly string WorkingDirectory;
+        
+        static LogSetup()
         {
-            ConfigureLogger(appId, orgId, descriptorTags, telemetryUrl, enableTelemetry, LogLevel.Info, new LoggingConfiguration(), enableConsole,  productName);
+            WorkingDirectory = Path.GetDirectoryName(Process.GetCurrentProcess().MainModule?.FileName) ?? string.Empty;
         }
-
-        public static void ConfigureLogger(string appId, string orgId, string descriptorTags, string telemetryUrl,
-            bool enableTelemetry, LogLevel telemetryLogLevel, LoggingConfiguration config, bool enableConsole, string productName)
+        
+        public static ILogger InitializeLogger(TelemetrySettings settings = null, string programDataDirectory = null)
         {
-            if (enableConsole)
+            if (!string.IsNullOrWhiteSpace(programDataDirectory) && File.Exists(Path.Combine(programDataDirectory, "nlog.appConfig")))
             {
-                var consoleTarget = new ColoredConsoleTarget();
-                config.AddTarget("console", consoleTarget);
-                consoleTarget.Layout = @"${date:format=HH\:mm\:ss} ${message} (${logger})";
-                config.LoggingRules.Add(new LoggingRule("*", LogLevel.Info, consoleTarget));
+                LogManager.LoadConfiguration(Path.Combine(programDataDirectory, "nlog.appConfig"));
             }
-
-            if (enableTelemetry && string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("OVERRIDE_CINEGY_TELEMETRY_TO_DISABLED")))
+            else if (File.Exists(Path.Combine(WorkingDirectory, "nlog.appConfig")))
             {
-                var bufferedEsTarget = ConfigureEsLog(appId, orgId, descriptorTags, telemetryUrl, productName);
-                config.AddTarget("elasticsearch", bufferedEsTarget);
-                config.LoggingRules.Add(new LoggingRule("*", telemetryLogLevel, bufferedEsTarget));
+                LogManager.LoadConfiguration(Path.Combine(WorkingDirectory, "nlog.appConfig"));
             }
             
-            LogManager.Configuration = config;
-        }
+            if (LogManager.Configuration == null)
+            {
+                //if no explicit nlog.appConfig file has been used, add a standard console logger
+                LogManager.Configuration = new LoggingConfiguration();
+                ConfigurationItemFactory.Default.LayoutRenderers.RegisterDefinition("pad",
+                    typeof(PaddingLayoutRendererWrapper));
 
-        private static BufferingTargetWrapper ConfigureEsLog(string appId, string orgId, string descriptorTags, string telemetryUrl, string productName)
+                var layout = new SimpleLayout
+                {
+                    Text = "${longdate} ${pad:padding=-10:inner=(${level:upperCase=true})} " +
+                           "${pad:padding=-20:fixedLength=true:inner=${logger:shortName=true}} " +
+                           "${message} ${exception:format=tostring}"
+                };
+
+                var consoleTarget = new ColoredConsoleTarget
+                {
+                    UseDefaultRowHighlightingRules = true,
+                    DetectConsoleAvailable = true,
+                    Layout = layout
+                };
+                
+                LogManager.Configuration.AddRule(LogLevel.Trace, LogLevel.Fatal, consoleTarget);
+            }
+            
+            if (settings?.Enabled == true && Environment.GetEnvironmentVariable("OVERRIDE_CINEGY_TELEMETRY_TO_DISABLED") == null)
+            {
+                var bufferedEsTarget = GetElasticsearchBufferingTargetWrapper(settings.ApplicationId, settings.OrganizationId,
+                    settings.RecordTags, settings.TelemetryUrl, settings.ProductName);
+                
+                LogManager.Configuration.AddRule(LogLevel.FromString(settings.LogLevel), LogLevel.Fatal, bufferedEsTarget);
+            }
+
+            LogManager.ReconfigExistingLoggers();
+            return LogManager.GetCurrentClassLogger();
+        }
+        
+        public static BufferingTargetWrapper GetElasticsearchBufferingTargetWrapper(string appId, string orgId, string descriptorTags, string telemetryUrl, string productName)
         {
             var indexNameParts = new List<string> { appId, "${date:universalTime=true:format=yyyy.MM.dd}" };
 

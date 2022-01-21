@@ -96,7 +96,7 @@ namespace Cinegy.Telemetry
                 }
             };
 
-            if (!string.IsNullOrWhiteSpace(info.Message)) eventObjectDictionary.Add("Message", info.Message);
+            if (!string.IsNullOrWhiteSpace(info.FormattedMessage)) eventObjectDictionary.Add("Message", info.FormattedMessage);
 
             if (info is TelemetryLogEventInfo telemetryInfo)
             {

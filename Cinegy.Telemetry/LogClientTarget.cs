@@ -16,12 +16,16 @@ namespace Cinegy.Telemetry
         public LogClientTarget()
         {
             Name = "Generic ILogClient";
-            
+
             try
             {
+                EnvironmentId = Environment.GetEnvironmentVariable("CINEGY_TELEMETRY_ENVID");
+
+                if (!string.IsNullOrWhiteSpace(EnvironmentId)) return;
+
                 var idPath = Path.Combine(Environment.GetFolderPath(
                     Environment.SpecialFolder.LocalApplicationData), "Cinegy\\Telemetry\\envid.txt");
-
+                    
                 if (File.Exists(idPath))
                 {
                     EnvironmentId = File.ReadAllText(idPath);
@@ -29,10 +33,11 @@ namespace Cinegy.Telemetry
                 else
                 {
                     EnvironmentId = Guid.NewGuid().ToString();
-                    if (!Directory.Exists(Path.GetDirectoryName(idPath))) Directory.CreateDirectory(Path.GetDirectoryName(idPath) ?? throw new InvalidOperationException());
+                    if (!Directory.Exists(Path.GetDirectoryName(idPath)))
+                        Directory.CreateDirectory(
+                            Path.GetDirectoryName(idPath) ?? throw new InvalidOperationException());
                     File.WriteAllText(idPath, EnvironmentId);
                 }
-
             }
             catch (Exception ex)
             {
@@ -69,13 +74,7 @@ namespace Cinegy.Telemetry
         {
             Write(new List<AsyncLogEventInfo>(1) { logEvent });
         }
-
-        [Obsolete]
-        protected override void Write(AsyncLogEventInfo[] logEvents)
-        {
-            SendBatch(logEvents);
-        }
-
+        
         protected override void Write(IList<AsyncLogEventInfo> logEvents)
         {
             SendBatch(logEvents);
